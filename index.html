@@ -7,43 +7,40 @@
     <style>
         body {
             margin: 0; /* Remove default margins */
-            overflow: hidden; /* Prevent scrollbars */
             background: black; /* Set background color */
+            color: white; /* Text color */
+            font-family: Arial, sans-serif; /* Font family */
+            overflow: auto; /* Allow scrolling */
         }
         canvas {
             position: absolute; /* Position canvas to cover entire screen */
             top: 0;
             left: 0;
+            pointer-events: none; /* Allow interaction with underlying elements */
+        }
+        .container {
+            padding: 20px; /* Add padding */
+            text-align: center; /* Center text */
         }
         .message {
-            position: absolute; /* Position message on top of canvas */
-            color: white; /* Text color */
-            font-size: 30px; /* Text size */
-            top: 20px; /* Distance from top */
-            left: 50%; /* Center horizontally */
-            transform: translateX(-50%); /* Center adjustment */
-            text-align: center; /* Center text */
-            z-index: 10; /* Ensure message is on top */
+            font-size: 24px; /* Adjust font size */
+            margin-bottom: 20px; /* Spacing below message */
         }
         .promises {
-            position: absolute; /* Position promises on top of canvas */
-            color: white; /* Text color */
-            font-size: 24px; /* Text size */
-            top: 80px; /* Distance from top */
-            left: 50%; /* Center horizontally */
-            transform: translateX(-50%); /* Center adjustment */
-            text-align: center; /* Center text */
-            z-index: 10; /* Ensure promises are on top */
+            font-size: 18px; /* Adjust font size */
+            line-height: 1.5; /* Improve readability */
         }
     </style>
 </head>
 <body>
-    <div class="message">ANTHONY PENNEY FOR STUDENT COUNCIL PRESIDENT!</div>
-    <div class="promises">
-        <p>- Empowering Collaboration: Imagine a community where your unique talents come together, creating extraordinary opportunities that elevate us all. Together, we can turn this vision into reality!</p>
-        <p>- Bullying Stops Here: Visualize a safe haven where respect reigns, and every voice is cherished. Feel the power of unity as we foster an inclusive environment where kindness prevails.</p>
-        <p>- Maximizing Student Benefits: Picture a world where every student receives the support they deserve, effortlessly navigating the resources that empower us. Together, we’ll ensure that no one is ever left behind.</p>
-        <p>- "A vote for me is a vote for yourself, as together we rise to greater heights!"</p>
+    <div class="container">
+        <div class="message">ANTHONY PENNEY FOR STUDENT COUNCIL PRESIDENT!</div>
+        <div class="promises">
+            <p>- Empowering Collaboration: Imagine a community where your unique talents come together, creating extraordinary opportunities that elevate us all. Together, we can turn this vision into reality!</p>
+            <p>- Bullying Stops Here: Visualize a safe haven where respect reigns, and every voice is cherished. Feel the power of unity as we foster an inclusive environment where kindness prevails.</p>
+            <p>- Maximizing Student Benefits: Picture a world where every student receives the support they deserve, effortlessly navigating the resources that empower us. Together, we’ll ensure that no one is ever left behind.</p>
+            <p>- "A vote for me is a vote for yourself, as together we rise to greater heights!"</p>
+        </div>
     </div>
     <canvas id="fireworksCanvas"></canvas>
     <script>
@@ -63,6 +60,7 @@
                 this.size = Math.random() * 3 + 2;
                 this.speed = Math.random() * 3 + 3; // Increased speed
                 this.color = `hsl(${Math.random() * 360}, 100%, 50%)`; // Random color
+                this.life = 1; // Firework life (1 means visible)
             }
 
             update() {
@@ -74,6 +72,8 @@
                         this.exploded = true;
                         this.createParticles();
                     }
+                } else {
+                    this.life -= 0.02; // Fade out life
                 }
             }
 
@@ -85,10 +85,12 @@
             }
 
             draw() {
+                ctx.globalAlpha = this.life; // Set alpha for fading effect
                 ctx.fillStyle = this.color; // Use firework color
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.globalAlpha = 1; // Reset alpha
             }
         }
 
@@ -121,9 +123,12 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Update and draw fireworks
-            for (const firework of fireworks) {
-                firework.update();
-                firework.draw();
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                fireworks[i].update();
+                fireworks[i].draw();
+                if (fireworks[i].life <= 0) {
+                    fireworks.splice(i, 1); // Remove dead fireworks
+                }
             }
 
             // Update and draw particles
